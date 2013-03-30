@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #all-content { margin: 40px auto; width: 600px }
+    #bounds { border: solid 1px red; padding: 40px; float: left }
+  </style>
+</head>
+<body>
+  <div id="all-content">
+    <div id="bounds">
+      <a id="feature-link" href="">Feature link</a>
+    </div>
+  </div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="js/jquery-proximity-loader.js"></script>
+  <script>
+    $(function () {
+      $('#feature-link').proximityLoader({
+          distance: 40
+        , js: 'load/just-alert.php'
+        , events: { 'click': function () {
+            console.log('Do this with link when feature js loaded')
+          }}
+        , success: function () { console.log('script loaded') }
+      });
+    });
+  </script>
+</body>
+</html>
