@@ -1,4 +1,4 @@
-jQuery Script Proximity Loader
+jQuery Proximity Loader
 ===
 
 Proximity loader helps you to defer script loading until the user enters the
@@ -26,3 +26,10 @@ Options
 * `events` Events to listen to on the element and their associated handler
     functions. These handlers will be proxied until the assets are load to a
     no-op function that will cancel the event and stop it bubbling.
+
+Methods
+---
+```javascript
+// Stops watching the users movements and destroys the current watch lists
+$.proximityLoader('destroy');
+```

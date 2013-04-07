@@ -8,7 +8,9 @@
 ;(function ($, undefined) {
 
   var $doc = $(document)
-    , loader = { listening: false, watchList: [] };
+    , slice = Array.prototype.slice
+    , loader = { listening: false, watchList: [] }
+    , methods = {};
 
   // Sets up the bounds for the selected elements and adds them to the watch
   // list. If any events are specified then those events are proxied until the
@@ -121,15 +123,43 @@
     $doc.off('mousemove', loader.check);
   };
 
+  // Cancels the event and stops propagation
   loader.cancelEventUntilLoaded = function (ev) {
     ev.preventDefault();
     ev.stopPropagation();
   };
 
-  $.fn.proximityLoader = function (options) {
+  // API methods
+  // ---
+
+  // ### Destroy
+  //
+  // Stops listening and kill the current watch list
+  methods.destroy = function () {
+    loader.stopListening();
+
+    // Stop the listed events from running handler until js loaded
+    $.each(loader.watchList, function (i, task) {
+      if (task.events) {
+        $.each(task.events, function (event, handler) {
+          task.$elem.off(event, loader.cancelEventUntilLoaded);
+        });
+      }
+    });
+
+    loader.watchList.length = 0;
+    return this;
+  };
+
+  // Apply plugin
+  $.proximityLoader = $.fn.proximityLoader = function (options) {
+    // Call init with options
     if (typeof options === 'object') {
       return loader.init.call(this, options);
     }
+
+    // Call API method
+    return methods[options].apply(this, slice.call(arguments, 1));
   };
 
 }(jQuery));
