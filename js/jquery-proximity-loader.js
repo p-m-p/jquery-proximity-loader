@@ -32,14 +32,45 @@
           }, options);
 
       loader.watchList.push(task);
-
-      // Stop the listed events from running handler until js loaded
-      if (options.events) {
-        $.each(options.events, function (event, handler) {
-          $elem.on(event, loader.cancelEventUntilLoaded);
-        });
-      }
+      loader.proxyEvents($elem, options.events);
     });
+  };
+
+  // Apply supplied event proxies
+  loader.proxyEvents = function ($elem, events) {
+    // Stop the listed events from running handler until js loaded
+    if (events) {
+      $.each(events, function (event, handler) {
+        if ($.isFunction(handler)) {
+          $elem.on(event, loader.cancelEventUntilLoaded);
+        }
+        else if ($.isPlainObject(handler)) {
+          if ($.isFunction(handler.before)) {
+            $elem.on(event, handler.before);
+          }
+        }
+      });
+    }
+  };
+
+  // Restore any proxied events and then apply the after event if
+  // present in the events options
+  loader.restoreProxiedEvents = function (task) {
+    if (task.events) {
+      $.each(task.events, function (event, handler) {
+        if ($.isFunction(handler)) {
+          task.$elem.off(event, loader.cancelEventUntilLoaded);
+          task.$elem.on(event, handler);
+        }
+        else if ($.isPlainObject(handler)) {
+          task.$elem.off(event, handler.before);
+
+          if ($.isFunction(handler.after)) {
+            task.$elem.on(event, handler.after);
+          }
+        }
+      });
+    }
   };
 
   // Works out the surrounding box for an element
@@ -48,12 +79,12 @@
       , height = $elem.outerHeight()
       , bounds = $elem.offset()
 
-    bounds.left = bounds.left - distance;
-    bounds.top = bounds.top - distance;
-    bounds.right = bounds.left + width + (distance * 2);
-    bounds.bottom = bounds.top + height + (distance * 2);
-
-    return bounds;
+    return {
+        left: bounds.left - distance
+      , top: bounds.top - distance
+      , right: bounds.left + width + distance
+      , bottom: bounds.top + height + distance
+    };
   };
 
   // Checks the watch list to see if any elements are in proximity
@@ -101,14 +132,9 @@
   // Applies any event handlers that have been proxied and runs the success
   // callback if set
   loader.run = function (task, data) {
-    if (task.events) {
-      $.each(task.events, function (event, handler) {
-        task.$elem.off(event, loader.cancelEventUntilLoaded);
-        task.$elem.on(event, handler);
-      });
-    }
+    loader.restoreProxiedEvents(task);
 
-    if (typeof task.success === 'function') {
+    if ($.isFunction(task.success)) {
       task.success.call(task.$elem, data);
     }
   };

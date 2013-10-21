@@ -12,15 +12,22 @@
       <a id="feature-link" href="">Feature link</a>
     </div>
   </div>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <script src="js/jquery-proximity-loader.js"></script>
   <script>
     $(function () {
       $('#feature-link').proximityLoader({
           distance: 40
         , js: 'load/just-alert.php'
-        , events: { 'click': function () {
-            console.log('Do this with link when feature js loaded')
+        , events: { 'click': {
+            before: function (ev) {
+              console.log('Not loaded yet');
+              ev.preventDefault();
+            },
+            after: function (ev) {
+              console.log('Loaded now :)');
+              ev.preventDefault();
+            }
           }}
         , success: function () { console.log('script loaded') }
       });
