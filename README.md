@@ -25,7 +25,10 @@ Options
 * `success` A callback function to run once the script has loaded
 * `events` Events to listen to on the element and their associated handler
     functions. These handlers will be proxied until the assets are load to a
-    no-op function that will cancel the event and stop it bubbling.
+    no-op function that will cancel the event and stop it bubbling. The event
+    handler may be a function or an object containing `before` and `after`
+    functions which will be bound to the element before the scripts are
+    loaded and then after, respectively.
 
 Methods
 ---

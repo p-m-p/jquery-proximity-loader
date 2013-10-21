@@ -55,6 +55,7 @@
 
   // Restore any proxied events and then apply the after event if
   // present in the events options
+  // FIXME split out switching off the proxied events
   loader.restoreProxiedEvents = function (task) {
     if (task.events) {
       $.each(task.events, function (event, handler) {
@@ -89,9 +90,9 @@
 
   // Checks the watch list to see if any elements are in proximity
   loader.check = function (ev) {
-    var i = 0, item = loader.watchList[i];
+    var i = 0, item;
 
-    while (item) {
+    while (item = loader.watchList[i]) {
       if ( // The mouse is within the elements proximity
         ev.pageX >= item.bounds.left && ev.pageX <= item.bounds.right &&
         ev.pageY >= item.bounds.top && ev.pageY <= item.bounds.bottom
@@ -102,8 +103,6 @@
       else {
         i += 1;
       }
-
-      item = loader.watchList[i];
     }
 
     // Nothing more to watch for then stop listening to the mousemove
@@ -126,6 +125,7 @@
       $.ajax({ url: script , dataType: 'script' })
         .done(function (data) { if (toLoad === 1) loader.run(task, data) })
         .always(function () { toLoad -= 1 });
+        // TODO handle error when loading script
     });
   };
 
@@ -168,6 +168,7 @@
     $.each(loader.watchList, function (i, task) {
       if (task.events) {
         $.each(task.events, function (event, handler) {
+          // FIXME need to switch off the before and after events
           task.$elem.off(event, loader.cancelEventUntilLoaded);
         });
       }
