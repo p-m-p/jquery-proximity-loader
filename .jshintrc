@@ -1,0 +1,14 @@
+{
+  "undef": true,
+  "unused": true,
+  "trailing": true,
+
+  "laxcomma": true,
+  "expr": true,
+  "supernew": true,
+  "boss": true,
+
+  "browser": true,
+  "jquery": true,
+  "node": true
+}

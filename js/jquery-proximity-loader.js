@@ -55,18 +55,20 @@
 
   // Restore any proxied events and then apply the after event if
   // present in the events options
-  // FIXME split out switching off the proxied events
-  loader.restoreProxiedEvents = function (task) {
+  loader.restoreProxiedEvents = function (task, dontApply) {
     if (task.events) {
       $.each(task.events, function (event, handler) {
         if ($.isFunction(handler)) {
           task.$elem.off(event, loader.cancelEventUntilLoaded);
-          task.$elem.on(event, handler);
+
+          if (!dontApply) {
+            task.$elem.on(event, handler);
+          }
         }
         else if ($.isPlainObject(handler)) {
           task.$elem.off(event, handler.before);
 
-          if ($.isFunction(handler.after)) {
+          if ($.isFunction(handler.after) && !dontApply) {
             task.$elem.on(event, handler.after);
           }
         }
@@ -78,7 +80,7 @@
   loader.calculateBounds = function ($elem, distance) {
     var width = $elem.outerWidth()
       , height = $elem.outerHeight()
-      , bounds = $elem.offset()
+      , bounds = $elem.offset();
 
     return {
         left: bounds.left - distance
@@ -123,9 +125,13 @@
     toLoad = task.js.length;
     $.each(task.js, function (i, script) {
       $.ajax({ url: script , dataType: 'script' })
-        .done(function (data) { if (toLoad === 1) loader.run(task, data) })
-        .always(function () { toLoad -= 1 });
-        // TODO handle error when loading script
+        .done(function (data) {
+          if (toLoad === 1) {
+            loader.run(task, data);
+          }
+        })
+        .always(function () { toLoad -= 1; })
+        .fail(task.error);
     });
   };
 
@@ -166,16 +172,37 @@
 
     // Stop the listed events from running handler until js loaded
     $.each(loader.watchList, function (i, task) {
-      if (task.events) {
-        $.each(task.events, function (event, handler) {
-          // FIXME need to switch off the before and after events
-          task.$elem.off(event, loader.cancelEventUntilLoaded);
-        });
-      }
+      loader.restoreProxiedEvents(task, true);
     });
 
     loader.watchList.length = 0;
     return this;
+  };
+
+  // ### Remove
+  //
+  // Removes the tasks associated with the list of elements from the watchlist
+  // and restores events
+  methods.remove = function () {
+    return this.each(function () {
+      var el = this
+        , i = 0
+        , task;
+
+      while (task = loader.watchList[0]) {
+        if (task.$elem.get(0) === el) {
+          loader.watchList.splice(i, 1);
+          loader.restoreProxiedEvents(task, true);
+        }
+        else {
+          i += 1;
+        }
+      }
+
+      if (!loader.watchList.length) {
+        loader.stopListening();
+      }
+    });
   };
 
   // Apply plugin

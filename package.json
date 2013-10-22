@@ -1,0 +1,21 @@
+{
+  "name": "jquery-proximity-loader",
+  "version": "0.0.1",
+  "description": "jQuery Proximity Loader ===",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/p-m-p/jquery-proximity-loader.git"
+  },
+  "author": "Phil Parsons",
+  "license": "MIT",
+  "gitHead": "33a691e07487acafb6e0de872aa9db7f54f45696",
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "grunt-contrib-jasmine": "~0.5.2",
+    "grunt-contrib-jshint": "~0.6.4"
+  }
+}
